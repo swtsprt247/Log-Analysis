@@ -1,8 +1,10 @@
 #! /usr/bin/env python
-#python
+'''python'''
 
 import psycopg2
 DBNAME = "news"
+
+
 def run_query(query):
     # """Connects to the database, runs the query,
     # and returns the results"""
@@ -75,7 +77,7 @@ def get_days_with_errors():
           ROUND(((errors.error_requests*1.0) / total.requests), 3) AS percent
         FROM ( SELECT date_trunc('day', time) "day", count(*) AS error_requests
           FROM log
-          WHERE status LIKE '404%' GROUP BY day) 
+          WHERE status LIKE '404%' GROUP BY day)
           AS errors
         JOIN ( SELECT date_trunc('day', time) "day", count(*) AS requests
           FROM log GROUP BY day) AS total
@@ -97,3 +99,4 @@ print('Gathering Analysis...\n')
 get_top_articles()
 get_top_article_authors()
 get_days_with_errors()
+
