@@ -1,11 +1,11 @@
 #! /usr/bin/env python
-'''python'''
+# coding: utf-8
 
 import psycopg2
 DBNAME = "news"
 
 
-def run_query(query):
+def get_data(query):
     # """Connects to the database, runs the query,
     # and returns the results"""
     db = psycopg2.connect('dbname=' + DBNAME)
@@ -14,35 +14,23 @@ def run_query(query):
     rows = c.fetchall()
     db.close()
     return rows
-    # except Exception as e:
-    #     print(type(e))
-    #     print("Database error: " + str(e))
-    #     exit(1)
 
 
-def get_top_articles():
-    """Top 3 read articles"""
-
+def list_popular_articles():
+    """ Display Popular Articles """ 
     query = """
-        SELECT articles.title, COUNT(*) AS num
-        FROM articles
-        JOIN log
-        ON log.path LIKE concat('/article/%', articles.slug)
-        GROUP BY articles.title
-        ORDER BY num DESC
-        LIMIT 3;
+    select title, count(*) as num
+    from articles, log
+    where log.path like '%' || articles.slug
+    group by title
+    order by num desc
     """
-
-    results = run_query(query)
-
-    print('\nTop Three Articles:')
-    count = 1
-    for i in results:
-        article = str(count) + '. "'
-        title = i[0]
-        views = '" with ' + str(i[1]) + " views"
-        print(article + title + views)
-        count += 1
+    results = get_data(query)[:3]
+    print('⋅The Most Popular Three Articles of all time:')
+    number = 1
+    for record in results:
+        print(str(number) + '. ' +'"{}" - {} views'.format(record[0], record[1]))
+        number += 1
 
 
 def get_top_article_authors():
@@ -57,15 +45,14 @@ def get_top_article_authors():
         ON log.path like concat('/article/%', articles.slug)
         GROUP BY authors.name
         ORDER BY num DESC
-        LIMIT 3;
     """
 
-    results = run_query(query)
+    results = get_data(query)[:3]
 
-    print('\nTop Three Authors:')
+    print('\nTop Three Popular Authors:')
     number = 1
-    for i in results:
-        print(str(number) + '. ' + i[0] + ' with ' + str(i[1]) + " views")
+    for record in results:
+        print(str(number) + '. ' +'"{}" - {} views'.format(record[0], record[1]))
         number += 1
 
 
@@ -73,20 +60,28 @@ def get_days_with_errors():
     """Days with more than 1% errors"""
 
     query = """
-        SELECT total.day,
-          ROUND(((errors.error_requests*1.0) / total.requests), 3) AS percent
-        FROM ( SELECT date_trunc('day', time) "day", count(*) AS error_requests
-          FROM log
-          WHERE status LIKE '404%' GROUP BY day)
-          AS errors
-        JOIN ( SELECT date_trunc('day', time) "day", count(*) AS requests
-          FROM log GROUP BY day) AS total
-        ON total.day = errors.day
-        WHERE (ROUND(((errors.error_requests*1.0) / total.requests), 3) > .01)
-        ORDER BY percent DESC;
+            WITH num_requests AS (
+                SELECT time::date AS day, count(*)
+                FROM log
+                GROUP BY time::date
+                ORDER BY time::date
+              ), num_errors AS (
+                SELECT time::date AS day, count(*)
+                FROM log
+                WHERE status != '200 OK'
+                GROUP BY time::date
+                ORDER BY time::date
+              ), error_rate AS (
+                SELECT num_requests.day,
+                  num_errors.count::float / num_requests.count::float * 100
+                  AS error_pc
+                FROM num_requests, num_errors
+                WHERE num_requests.day = num_errors.day
+              )
+            SELECT * FROM error_rate WHERE error_pc > 1;
     """
 
-    results = run_query(query)
+    results = get_data(query)
 
     print('\nDays With More Than 1% Errors:')
     for x in results:
@@ -96,7 +91,6 @@ def get_days_with_errors():
 
 
 print('Gathering Analysis...\n')
-get_top_articles()
+list_popular_articles()
 get_top_article_authors()
 get_days_with_errors()
-
