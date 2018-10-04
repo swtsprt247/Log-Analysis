@@ -30,16 +30,15 @@ The reporting tool needed to answer the following questions:
 # Expected Output:
 ```Gathering Analysis...
 
+⋅The Most Popular Three Articles of all time:
+1. "Candidate is jerk, alleges rival" - 677294 views
+2. "Bears love berries, alleges bear" - 507602 views
+3. "Bad things gone, say good people" - 340196 views
 
-Top Three Articles:
-1. "Candidate is jerk, alleges rival" with 338647 views
-2. "Bears love berries, alleges bear" with 253801 views
-3. "Bad things gone, say good people" with 170098 views
-
-Top Three Authors:
-1. Ursula La Multa with 507594 views
-2. Rudolf von Treppenwitz with 423457 views
-3. Anonymous Contributor with 170098 views
+Top Three Popular Authors:
+1. "Ursula La Multa" - 2030376 views
+2. "Rudolf von Treppenwitz" - 1693828 views
+3. "Anonymous Contributor" - 680392 views
 
 Days With More Than 1% Errors:
-July 17, 2016 - 2.3% Errors!```
+July 17, 2016 - 226.3% Errors!```
